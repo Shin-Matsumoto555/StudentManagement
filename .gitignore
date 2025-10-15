@@ -1,0 +1,15 @@
+# IntelliJ IDEA
+.idea/
+
+# Gradle
+.gradle/
+build/
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
+
+# Other IDE-related
+out/
