@@ -1,15 +1,13 @@
-# IntelliJ IDEA
+# Build
+/build/
+.gradle/
+out/
+
+# IntelliJ
 .idea/
 
-# Gradle
-.gradle/
-build/
-
-# Mac
+# OS files
 .DS_Store
 
 # Logs
 *.log
-
-# Other IDE-related
-out/
