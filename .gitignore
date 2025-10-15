@@ -1,19 +1,13 @@
-# Gradle
+# Build
+/build/
 .gradle/
-build/
+out/
 
-# IntelliJ IDEA
+# IntelliJ
 .idea/
-*.iml
 
-# macOS
+# OS files
 .DS_Store
 
-# Log files
+# Logs
 *.log
-
-# Windows
-*.bat
-
-# Other generated files
-out/
