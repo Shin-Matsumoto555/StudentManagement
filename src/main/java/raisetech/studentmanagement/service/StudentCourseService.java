@@ -19,4 +19,8 @@ public class StudentCourseService {
     // 後でRepository（MyBatis）の実装を呼び出す
     return studentCourseRepository.findAll();
   }
+
+  public StudentCourse findById(int id) {
+    return studentCourseRepository.findById(id);
+  }
 }
