@@ -11,10 +11,12 @@ import raisetech.studentmanagement.StudentCourse;
 public interface StudentCourseRepository {
 
   // Read (参照) - 全件取得のメソッド
-  @Select("SELECT * FROM student_courses")
+  // 👈 SELECT * から明示的なカラムリストに修正
+  @Select("SELECT id, seq_id, student_uuid, course_name, start_date, end_date FROM student_courses")
   List<StudentCourse> findAll();
 
   // Read (参照) - ID指定で1件取得のメソッド
-  @Select("SELECT * FROM student_courses WHERE id = #{id}")
+  // 👈 SELECT * から明示的なカラムリストに修正
+  @Select("SELECT id, seq_id, student_uuid, course_name, start_date, end_date FROM student_courses WHERE id = #{id}")
   StudentCourse findById(int id);
 }
