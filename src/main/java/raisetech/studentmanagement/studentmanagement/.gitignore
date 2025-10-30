@@ -1,0 +1,12 @@
+# ビルド生成物
+/build/
+
+# Gradle関連
+.gradle/
+*.gradle.properties
+!/gradle/wrapper/
+
+# IDE設定ファイル (IntelliJなど)
+.idea/
+*.iml
+.DS_Store
