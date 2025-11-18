@@ -1,0 +1,12 @@
+# IntelliJ
+.idea/        # IDE 設定ファイル
+*.iml         # モジュール設定ファイル
+out/          # コンパイル結果
+
+# Gradle
+/build/       # ビルド出力
+.gradle/      # Gradle キャッシュ
+!gradle/wrapper/gradle-wrapper.jar  # ラッパーは必要なので無視しない
+
+# OS
+.DS_Store     # macOS の不要ファイル

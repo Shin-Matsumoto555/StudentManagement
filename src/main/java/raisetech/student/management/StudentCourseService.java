@@ -1,8 +1,7 @@
-package raisetech.studentmanagement.service;
+package raisetech.student.management;
 
 import org.springframework.stereotype.Service;
-import raisetech.studentmanagement.StudentCourse;
-import raisetech.studentmanagement.repository.StudentCourseRepository;
+import raisetech.student.management.StudentCourse;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class StudentCourseService {
     return studentCourseRepository.findAll();
   }
 
-  public StudentCourse findById(int id) {
-    return studentCourseRepository.findById(id);
+  public StudentCourse findById(String uuid) {
+    return studentCourseRepository.findById(uuid);
   }
 }
