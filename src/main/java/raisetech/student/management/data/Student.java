@@ -1,4 +1,4 @@
-package raisetech.student.management;
+package raisetech.student.management.data;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +13,8 @@ public class Student {
   private String nickname;
   private String email;
   private String address;
-  private String age;
+  private int age;
   private String gender;
+  private String remark;
+  private boolean isDeleted;
 }
