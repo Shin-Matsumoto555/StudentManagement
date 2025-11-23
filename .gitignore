@@ -13,3 +13,7 @@ build/
 
 # Other IDE-related
 out/
+
+# Temporary / lock files
+*.lock
+*.tmp
