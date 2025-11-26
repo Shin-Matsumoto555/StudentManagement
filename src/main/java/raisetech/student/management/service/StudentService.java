@@ -1,10 +1,15 @@
 package raisetech.student.management.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourses;
+import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.repository.StudentRepository;
 
 @Service
@@ -20,16 +25,34 @@ public class StudentService {
   public List<Student> searchStudentList() {
     // 検索処理を行う
     repository.search();
-
-    // 絞り込みをする、年齢が３０代の人のみを抽出する。
-    // 抽出したリストをコントローラーに返す。
-
+    // 例：絞り込みをする、年齢が３０代の人のみを抽出する。
+    // 例：抽出したリストをコントローラーに返す。
     return repository.search();
   }
 
   public List<StudentCourses> searchStudentCourseList() {
-    // 絞り込み検索で"Java Course"のコース情報のみを抽出する。
-    // 抽出したリストをコントローラーに返す。
+    // 例：絞り込み検索で"Java Course"のコース情報のみを抽出する。
+    // 例：抽出したリストをコントローラーに返す。
     return repository.searchStudentCourses();
+  }
+
+  @Transactional
+  public void registerStudent(StudentDetail studentDetail) {
+    // Student オブジェクトを変数に入れる
+    Student student = studentDetail.getStudent();
+    // UUID を生成してセット
+    student.setStudentUuid(UUID.randomUUID().toString());
+    // ここで DB に保存する処理
+    repository.registerStudent(studentDetail.getStudent());
+    // Todo: コース情報登録も行う
+    for (StudentCourses studentCourse : studentDetail.getStudentCourses()) {
+      // 各コース行の UUID を生成
+      studentCourse.setUuid(UUID.randomUUID().toString());
+
+      studentCourse.setStudentUuid(studentDetail.getStudent().getStudentUuid());
+      studentCourse.setStartDate(LocalDateTime.now());
+      studentCourse.setEndDate(LocalDateTime.now().plusYears(1));
+      repository.registerStudentCourses(studentCourse);
+    }
   }
 }

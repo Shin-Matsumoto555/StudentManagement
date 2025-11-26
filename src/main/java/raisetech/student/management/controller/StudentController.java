@@ -1,6 +1,7 @@
 package raisetech.student.management.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,9 @@ public class StudentController {
 
   @GetMapping("/newStudent")
   public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudentCourses(Arrays.asList(new StudentCourses()));
+    model.addAttribute("studentDetail", studentDetail);
     return "registerStudent";
   }
 
@@ -55,7 +58,12 @@ public class StudentController {
       return "registerStudent";
     }
     // 新規受講生情報を登録する処理を実装する。
-    // （余裕がある人は）コース情報も一緒に登録できるように実装する。コースは単体で良い。
-    return "redirect:/studentList";
+    // ＜いらない？＞StudentDetail → Student に変換
+    // ＜いらない？＞Student student = converter.convertToStudent(studentDetail);
+
+    // Service に渡して DB に登録
+    service.registerStudent(studentDetail);
+
+    return "redirect:/studentList"; // 登録後、一覧ページに戻る
   }
 }
