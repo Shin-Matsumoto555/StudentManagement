@@ -28,31 +28,34 @@ public interface StudentRepository {
   @Select("SELECT * FROM student_courses WHERE student_uuid = #{studentUuid}")
   List<StudentCourses> searchStudentCourses(String studentUuid);
 
-    // 追加：新規登録
-    @org.apache.ibatis.annotations.Insert(
-        "INSERT INTO students(student_uuid, name, furigana_name, nickname, email, address, age, gender, remark, is_deleted) " +
-            "VALUES(#{studentUuid}, #{name}, #{furiganaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{deleted})"
-    )
-    @Options(useGeneratedKeys = true, keyProperty = "student_uuid")
-    void registerStudent(Student student);
+  // 追加：新規登録
+  @org.apache.ibatis.annotations.Insert(
+      "INSERT INTO students(student_uuid, name, furigana_name, nickname, email, address, age, gender, remark, is_deleted) "
+          +
+          "VALUES(#{studentUuid}, #{name}, #{furiganaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{deleted})"
+  )
+  @Options(useGeneratedKeys = true, keyProperty = "student_uuid")
+  void registerStudent(Student student);
 
-    @Insert(
-        "INSERT INTO student_courses(uuid, student_uuid, course_name, start_date, end_date) " +
-            "VALUES(#{uuid}, #{studentUuid}, #{courseName}, #{startDate}, #{endDate})")
-    @Options(useGeneratedKeys = true, keyProperty = "uuid")
-    void registerStudentCourses(StudentCourses studentCourses);
+  @Insert(
+      "INSERT INTO student_courses(uuid, student_uuid, course_name, start_date, end_date) " +
+          "VALUES(#{uuid}, #{studentUuid}, #{courseName}, #{startDate}, #{endDate})")
+  @Options(useGeneratedKeys = true, keyProperty = "uuid")
+  void registerStudentCourses(StudentCourses studentCourses);
 
-    // 追加：受講生の更新
-    @org.apache.ibatis.annotations.Update(
-        "UPDATE students SET name = #{name}, furigana_name = #{furiganaName}, nickname = #{nickname}, " +
-            "email = #{email}, address = #{address}, age = #{age}, gender = #{gender}, remark = #{remark}, " +
-            "is_deleted = #{deleted} WHERE student_uuid = #{studentUuid}"
-    )
-    void updateStudent(Student student);
+  // 追加：受講生の更新
+  @org.apache.ibatis.annotations.Update(
+      "UPDATE students SET name = #{name}, furigana_name = #{furiganaName}, nickname = #{nickname}, "
+          +
+          "email = #{email}, address = #{address}, age = #{age}, gender = #{gender}, remark = #{remark}, "
+          +
+          "is_deleted = #{deleted} WHERE student_uuid = #{studentUuid}"
+  )
+  void updateStudent(Student student);
 
-    // 追加：コースの更新
-    @org.apache.ibatis.annotations.Update(
-        "UPDATE student_courses SET course_name = #{courseName} WHERE uuid = #{uuid}"
-    )
-    void updateStudentCourses(StudentCourses studentCourses);
-  }
+  // 追加：コースの更新
+  @org.apache.ibatis.annotations.Update(
+      "UPDATE student_courses SET course_name = #{courseName} WHERE uuid = #{uuid}"
+  )
+  void updateStudentCourses(StudentCourses studentCourses);
+}
