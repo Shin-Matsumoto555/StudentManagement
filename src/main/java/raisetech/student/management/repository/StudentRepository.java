@@ -5,12 +5,12 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourses;
 
 /**
- * 　受講生情報を扱うリポジトリ。
- * 　全件検索や単一条件での検索、コース情報の検索が行えるクラスです。
+ * 　受講生情報を扱うリポジトリ。 　全件検索や単一条件での検索、コース情報の検索が行えるクラスです。
  */
 
 @Mapper
@@ -29,7 +29,7 @@ public interface StudentRepository {
   List<StudentCourses> searchStudentCourses(String studentUuid);
 
   // 追加：新規登録
-  @org.apache.ibatis.annotations.Insert(
+  @Insert(
       "INSERT INTO students(student_uuid, name, furigana_name, nickname, email, address, age, gender, remark, is_deleted) "
           +
           "VALUES(#{studentUuid}, #{name}, #{furiganaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{deleted})"
@@ -44,7 +44,7 @@ public interface StudentRepository {
   void registerStudentCourses(StudentCourses studentCourses);
 
   // 追加：受講生の更新
-  @org.apache.ibatis.annotations.Update(
+  @Update(
       "UPDATE students SET name = #{name}, furigana_name = #{furiganaName}, nickname = #{nickname}, "
           +
           "email = #{email}, address = #{address}, age = #{age}, gender = #{gender}, remark = #{remark}, "
@@ -54,7 +54,7 @@ public interface StudentRepository {
   void updateStudent(Student student);
 
   // 追加：コースの更新
-  @org.apache.ibatis.annotations.Update(
+  @Update(
       "UPDATE student_courses SET course_name = #{courseName} WHERE uuid = #{uuid}"
   )
   void updateStudentCourses(StudentCourses studentCourses);
