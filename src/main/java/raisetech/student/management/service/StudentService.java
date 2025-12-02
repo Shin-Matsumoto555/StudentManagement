@@ -14,7 +14,7 @@ import raisetech.student.management.repository.StudentRepository;
 @Service
 public class StudentService {
 
-  private StudentRepository repository;
+  private final StudentRepository repository;
 
   @Autowired
   public StudentService(StudentRepository repository) {
@@ -45,7 +45,7 @@ public class StudentService {
   }
 
   @Transactional
-  public void registerStudent(StudentDetail studentDetail) {
+  public StudentDetail registerStudent(StudentDetail studentDetail) {
     // Student オブジェクトを変数に入れる
     Student student = studentDetail.getStudent();
     // UUID を生成してセット
@@ -62,6 +62,7 @@ public class StudentService {
       studentCourse.setEndDate(LocalDateTime.now().plusYears(1));
       repository.registerStudentCourses(studentCourse);
     }
+    return studentDetail;
   }
 
   @Transactional
