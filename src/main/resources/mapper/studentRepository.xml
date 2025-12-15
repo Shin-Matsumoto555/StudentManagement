@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="raisetech.student.management.repository.StudentRepository">
+
+  <!-- 受講生の全件検索 -->
+  <insert id="registerStudent"
+    keyProperty="studentUuid"
+    parameterType="raisetech.student.management.data.Student"
+    useGeneratedKeys="true">
+    INSERT INTO students(
+    student_uuid,
+    name,
+    furigana_name,
+    nickname,
+    email,
+    address,
+    age,
+    gender,
+    remark,
+    is_deleted
+    )
+    VALUES(
+    #{studentUuid},
+    #{name},
+    #{furiganaName},
+    #{nickname},
+    #{email},
+    #{address},
+    #{age},
+    #{gender},
+    #{remark},
+    #{deleted}
+    )
+  </insert>
+
+  <!-- 受講生の検索 -->
+  <insert id="registerStudentCourse"
+    keyProperty="uuid"
+    parameterType="raisetech.student.management.data.StudentCourse"
+    useGeneratedKeys="true">
+    INSERT INTO student_courses(
+    uuid,
+    student_uuid,
+    course_name,
+    start_date,
+    end_date
+    )
+    VALUES(
+    #{uuid},
+    #{studentUuid},
+    #{courseName},
+    #{startDate},
+    #{endDate}
+    )
+  </insert>
+
+  <!-- 受講生コース情報の全件検索 -->
+  <select id="searchStudentCourseList"
+    resultType="raisetech.student.management.data.StudentCourse">
+    SELECT * FROM student_courses
+  </select>
+
+  <!-- 受講生IDに紐づく受講生コース情報の検索 -->
+  <select id="searchStudentCourse"
+    resultType="raisetech.student.management.data.StudentCourse">
+    SELECT * FROM student_courses
+    WHERE student_uuid = #{studentUuid}
+  </select>
+
+  <!-- 受講生の新規登録 -->
+  <select id="search" resultType="raisetech.student.management.data.Student">
+    SELECT * FROM students
+  </select>
+
+  <!-- 受講生コース情報の新規登録 -->
+  <select id="searchStudent" resultType="raisetech.student.management.data.Student">
+    SELECT * FROM students WHERE student_uuid = #{studentUuid}
+  </select>
+
+  <!-- 受講生の更新 -->
+  <update id="updateStudent"
+    parameterType="raisetech.student.management.data.Student">
+    UPDATE students
+    SET
+    name = #{name},
+    furigana_name = #{furiganaName},
+    nickname = #{nickname},
+    email = #{email},
+    address = #{address},
+    age = #{age},
+    gender = #{gender},
+    remark = #{remark},
+    is_deleted = #{deleted}
+    WHERE student_uuid = #{studentUuid}
+  </update>
+
+  <!-- 受講生コース情報の更新 -->
+  <update id="updateStudentCourse"
+    parameterType="raisetech.student.management.data.StudentCourse">
+    UPDATE student_courses
+    SET course_name = #{courseName}
+    WHERE uuid = #{uuid}
+  </update>
+
+</mapper>

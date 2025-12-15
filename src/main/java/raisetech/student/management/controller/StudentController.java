@@ -1,8 +1,10 @@
 package raisetech.student.management.controller;
 
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import raisetech.student.management.service.StudentService;
 /**
  * 受講生の検索や登録、更新などを行うREST APIとして受け付けるControllerです。
  */
+@Validated
 @RestController
 public class StudentController {
 
@@ -47,7 +50,7 @@ public class StudentController {
    * @return 受講生
    */
   @GetMapping("/student/{studentUuid}")
-  public StudentDetail getStudent(@PathVariable String studentUuid) {
+  public StudentDetail getStudent(@PathVariable @Size(min = 1, max = 36) String studentUuid) {
     StudentDetail studentDetail = service.searchStudent(studentUuid);
     return service.searchStudent(studentUuid);
   }
