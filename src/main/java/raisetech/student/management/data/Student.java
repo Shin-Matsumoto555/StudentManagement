@@ -1,8 +1,9 @@
 package raisetech.student.management.data;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,8 +28,9 @@ public class Student {
   @NotBlank
   private String address;
 
-  @Pattern(regexp = "\\d+$")
-  private int age;
+  @Min(0)
+  @Max(150)
+  private Integer age;
 
   private String gender;
 
