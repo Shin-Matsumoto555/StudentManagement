@@ -61,6 +61,12 @@ public class StudentService {
    */
   public StudentDetail searchStudent(String studentUuid) {
     Student student = repository.searchStudent(studentUuid);
+
+    // 存在しない学生を検索した場合の例外処理
+    if (student == null) {
+      throw new RuntimeException("該当の学生が存在しません: " + studentUuid);
+    }
+
     List<StudentCourse> studentCourse = repository.searchStudentCourse(student.getStudentUuid());
     return new StudentDetail(student, studentCourse);
   }
