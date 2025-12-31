@@ -10,7 +10,7 @@ import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 
 /**
- * 受講生と受講生コース情報を受王政詳細に変換するコンバーターです。
+ * 受講生と受講生コース情報を受講生詳細に変換するコンバーターです。
  */
 @Component
 public class StudentConverter {

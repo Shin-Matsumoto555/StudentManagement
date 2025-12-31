@@ -1,5 +1,6 @@
 package raisetech.student.management.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -39,6 +40,7 @@ public class StudentController {
    *
    * @return 受講生詳細一覧（全件）
    */
+  @Operation(summary = "一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList() {
     return service.searchStudentList();
@@ -52,7 +54,6 @@ public class StudentController {
    */
   @GetMapping("/student/{studentUuid}")
   public StudentDetail getStudent(@PathVariable @Size(min = 1, max = 36) String studentUuid) {
-    StudentDetail studentDetail = service.searchStudent(studentUuid);
     return service.searchStudent(studentUuid);
   }
 
@@ -63,6 +64,7 @@ public class StudentController {
    * @return 実行結果
    */
   // 新規受講生情報を登録する処理を実装する。
+  @Operation(summary = "受講生登録", description = "受講生を登録します。")
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody StudentDetail studentDetail) {

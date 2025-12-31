@@ -31,13 +31,13 @@ public class StudentService {
    * 受講生コース情報を登録する際の初期情報を設定する。
    *
    * @param studentCourse 受講生コース情報
-   * @param student       受講生
+   * @param studentUuid   受講生ID
    */
-  private static void initStudentCourse(StudentCourse studentCourse, Student student) {
+  void initStudentCourse(StudentCourse studentCourse, String studentUuid) {
     LocalDateTime now = LocalDateTime.now();
 
     studentCourse.setUuid(UUID.randomUUID().toString());      // 各コース行の UUID を生成
-    studentCourse.setStudentUuid(student.getStudentUuid());
+    studentCourse.setStudentUuid(studentUuid);
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
   }
@@ -84,7 +84,7 @@ public class StudentService {
 
     repository.registerStudent(student);    // ここから DB に保存する処理（やりたいこと）
     studentDetail.getStudentCourseList().forEach(studentCourse -> {      // コース情報登録も行う
-      initStudentCourse(studentCourse, student);
+      initStudentCourse(studentCourse, student.getStudentUuid());
       repository.registerStudentCourse(studentCourse);
     });
     return studentDetail;

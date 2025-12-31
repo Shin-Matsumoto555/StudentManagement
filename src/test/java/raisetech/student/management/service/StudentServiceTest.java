@@ -1,9 +1,11 @@
 package raisetech.student.management.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +44,7 @@ class StudentServiceTest {
     Mockito.when(repository.search()).thenReturn(studentList);
     Mockito.when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
     // 実行
-    List<StudentDetail> actual = sut.searchStudentList();
+    sut.searchStudentList();
     // 検証
     Mockito.verify(repository, times(1)).search();
     Mockito.verify(repository, times(1)).searchStudentCourseList();
@@ -53,7 +55,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細検索_該当する学生が存在する場合_学生とコースが返る() {
+  void 受講生詳細の検索_該当する学生が存在する場合_学生とコースが返る() {
     // 事前準備
     String studentUuid = "test-uuid";
     Student student = new Student();
@@ -69,12 +71,29 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細検索_学生が存在しない場合_例外が発生する() {
+  void 受講生詳細の検索_学生が存在しない場合_例外が発生する() {
     // 事前準備
     String studentUuid = "not-exist";
     Mockito.when(repository.searchStudent(studentUuid)).thenReturn(null);
     // 実行 + 検証
     assertThrows(RuntimeException.class, () -> sut.searchStudent(studentUuid));
+  }
+
+  @Test
+  void 受講生コース初期化_受講生IDと日時が正しく設定されること() {
+    // 準備
+    String studentUuid = "test-uuid";
+    StudentCourse studentCourse = new StudentCourse();
+    // 実行
+    sut.initStudentCourse(studentCourse, studentUuid);
+    // 検証
+    assertEquals(studentUuid, studentCourse.getStudentUuid());
+    assertNotNull(studentCourse.getUuid());
+    assertEquals(LocalDateTime.now().getHour(),
+        studentCourse.getStartDate().getHour());
+    assertEquals(LocalDateTime.now().plusYears(1).getYear(),
+        studentCourse.getEndDate().getYear()
+    );
   }
 
   @Test
