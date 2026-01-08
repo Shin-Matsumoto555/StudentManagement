@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 
@@ -20,5 +21,8 @@ public class StudentDetail {
   @Valid
   private Student student;
   private List<StudentCourse> studentCourseList;
+
+  // 課題44により追加
+  private List<ApplicationStatus> applicationStatusList;
 
 }

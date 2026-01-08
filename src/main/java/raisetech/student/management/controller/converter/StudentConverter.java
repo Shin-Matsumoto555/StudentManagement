@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -24,7 +25,8 @@ public class StudentConverter {
    */
   // 既存メソッド（Student + Courses → StudentDetail）
   public List<StudentDetail> convertStudentDetails(List<Student> studentList,
-      List<StudentCourse> studentCourseList) {
+      List<StudentCourse> studentCourseList,
+      List<ApplicationStatus> applicationStatusList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
     studentList.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
@@ -35,6 +37,19 @@ public class StudentConverter {
           .collect(Collectors.toList());
 
       studentDetail.setStudentCourseList(convertStudentCourseList);
+
+      // --- ↓ ここから課題44により追記：各コースに紐づく「申込状況」を抽出してセット ---
+      List<ApplicationStatus> convertApplicationStatusList = convertStudentCourseList.stream()
+          .map(course -> applicationStatusList.stream()
+              .filter(status -> status.getCourseUuid().equals(course.getCourseUuid()))
+              .findFirst()
+              .orElse(null))
+          .filter(status -> status != null)
+          .collect(Collectors.toList());
+
+      studentDetail.setApplicationStatusList(convertApplicationStatusList);
+      // --- ↑ ここまで課題44により追記 ---
+
       studentDetails.add(studentDetail);
     });
     return studentDetails;

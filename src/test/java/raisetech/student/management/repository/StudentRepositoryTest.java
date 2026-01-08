@@ -95,7 +95,7 @@ class StudentRepositoryTest {
 
     List<StudentCourse> courses = sut.searchStudentCourseList();
     StudentCourse actual = courses.stream()
-        .filter(c -> c.getUuid().equals(target.getUuid()))
+        .filter(c -> c.getCourseUuid().equals(target.getCourseUuid()))
         .findFirst().orElseThrow();
 
     assertThat(actual.getCourseName()).isEqualTo("Updated Course Name");
@@ -105,7 +105,7 @@ class StudentRepositoryTest {
   @Test
   void 受講生コース情報の登録が行えること() {
     StudentCourse course = new StudentCourse();
-    course.setUuid(UUID.randomUUID().toString());
+    course.setCourseUuid(UUID.randomUUID().toString());
     course.setStudentUuid(sut.search().get(0).getStudentUuid());
     course.setCourseName("New Course");
     course.setStartDate(LocalDateTime.now());
@@ -119,4 +119,16 @@ class StudentRepositoryTest {
         .extracting(StudentCourse::getCourseName)
         .contains("New Course");
   }
+
+  // 9. 受講生の条件検索
+  @Test
+  void 受講生の条件検索が行えること() {
+    // 検索条件をすべてnull（実質全件検索と同じSQLパス）で実行
+    List<Student> actual = sut.searchByConditions(new Student(), new StudentCourse(),
+        new raisetech.student.management.data.ApplicationStatus());
+
+    // 既存のデータが5件ある前提
+    assertThat(actual.size()).isEqualTo(5);
+  }
+
 }

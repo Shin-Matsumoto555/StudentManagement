@@ -36,22 +36,39 @@
 
   <!-- 受講生コース情報の新規登録 -->
   <insert id="registerStudentCourse"
-    keyProperty="uuid"
+    keyProperty="courseUuid"
     parameterType="raisetech.student.management.data.StudentCourse"
     useGeneratedKeys="true">
     INSERT INTO student_courses(
-    uuid,
+    course_uuid,
     student_uuid,
     course_name,
     start_date,
     end_date
     )
     VALUES(
-    #{uuid},
+    #{courseUuid},
     #{studentUuid},
     #{courseName},
     #{startDate},
     #{endDate}
+    )
+  </insert>
+
+  <!-- 新しくコースの申し込みがあった際に、その申込状況（status）をデータベースに新しく保存 -->
+  <insert id="registerApplicationStatus"
+    keyProperty="statusUuid"
+    parameterType="raisetech.student.management.data.ApplicationStatus"
+    useGeneratedKeys="true">
+    INSERT INTO application_status(
+    status_uuid,
+    course_uuid,
+    status
+    )
+    VALUES(
+    #{statusUuid},
+    #{courseUuid},
+    #{status}
     )
   </insert>
 
@@ -78,7 +95,43 @@
     SELECT * FROM students WHERE student_uuid = #{studentUuid}
   </select>
 
+  <!-- 受講生が申し込んだ各コースの状況（仮申込や本申込など）を、データベースから全件取得 -->
+  <select id="searchApplicationStatusList"
+    resultType="raisetech.student.management.data.ApplicationStatus">
+    SELECT * FROM application_status
+  </select>
+
+  <!-- 特定のコースIDを指定して、そのコースに紐づいている申込状況（ステータス）をピンポイントで取得 -->
+  <select id="searchApplicationStatus"
+    resultType="raisetech.student.management.data.ApplicationStatus">
+    SELECT * FROM application_status
+    WHERE course_uuid = #{courseUuid}
+  </select>
+
   <!-- 受講生の更新 -->
+  <select id="searchByConditions" resultType="raisetech.student.management.data.Student">
+    SELECT DISTINCT s.* FROM students s
+    LEFT JOIN student_courses sc ON s.student_uuid = sc.student_uuid
+    LEFT JOIN application_status aps ON sc.course_uuid = aps.course_uuid
+    <where>
+      <if test="student != null">
+        <if test="student.name != null and student.name != ''">
+          AND s.name LIKE CONCAT('%', #{student.name}, '%')
+        </if>
+        <if test="student.isDeleted != null">
+          AND s.is_deleted = #{student.isDeleted}
+        </if>
+      </if>
+      <if test="course != null and course.courseName != null and course.courseName != ''">
+        AND sc.course_name = #{course.courseName}
+      </if>
+      <if test="status != null and status.status != null and status.status != ''">
+        AND aps.status = #{status.status}
+      </if>
+    </where>
+  </select>
+
+  <!-- 受講生コース情報の更新 -->
   <update id="updateStudent"
     parameterType="raisetech.student.management.data.Student">
     UPDATE students
@@ -95,12 +148,21 @@
     WHERE student_uuid = #{studentUuid}
   </update>
 
-  <!-- 受講生コース情報の更新 -->
+  <!-- 受講状況の更新 -->
   <update id="updateStudentCourse"
     parameterType="raisetech.student.management.data.StudentCourse">
     UPDATE student_courses
-    SET course_name = #{courseName}
-    WHERE uuid = #{uuid}
+    SET course_name = #{courseName},
+    is_deleted = #{isDeleted}
+    WHERE course_uuid = #{courseUuid}
+  </update>
+
+  <!-- 条件指定全検索 -->
+  <update id="updateApplicationStatus"
+    parameterType="raisetech.student.management.data.ApplicationStatus">
+    UPDATE application_status
+    SET status = #{status},
+    is_deleted = #{isDeleted} WHERE status_uuid = #{statusUuid}
   </update>
 
 </mapper>
