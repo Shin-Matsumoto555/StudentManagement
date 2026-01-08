@@ -152,17 +152,28 @@ public class StudentService {
     repository.updateStudent(studentDetail.getStudent()); // Student の更新
     studentDetail.getStudentCourseList()
         .forEach(repository::updateStudentCourse); // コースの更新（今は uuid が存在する前提の最小構成）
-    studentDetail.getApplicationStatusList().forEach(repository::updateApplicationStatus);
+    // repository:: ではなく this:: に書き換える！
+    studentDetail.getApplicationStatusList().forEach(this::updateApplicationStatus);
   }
-
+  
   /**
-   * 申込状況の更新を行います。
+   * 申込状況の更新を行います。 DBに対象のコースIDのステータスが存在しない場合は、新規登録(INSERT)を行います。
    *
    * @param applicationStatus 申込状況
    */
   @Transactional
   public void updateApplicationStatus(ApplicationStatus applicationStatus) {
-    repository.updateApplicationStatus(applicationStatus);
-  }
+    // 1. まず現在のステータスをDBから探す
+    List<ApplicationStatus> statusList = repository.searchApplicationStatus(
+        applicationStatus.getCourseUuid());
 
+    if (statusList.isEmpty()) {
+      // 2. DBにまだレコードがない場合は、新規登録(INSERT)
+      applicationStatus.setStatusUuid(UUID.randomUUID().toString()); // UUIDを新しく作る
+      repository.registerApplicationStatus(applicationStatus);
+    } else {
+      // 3. すでにDBにレコードがある場合は、更新(UPDATE)
+      repository.updateApplicationStatus(applicationStatus);
+    }
+  }
 }

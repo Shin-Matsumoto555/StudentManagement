@@ -161,8 +161,8 @@
   <update id="updateApplicationStatus"
     parameterType="raisetech.student.management.data.ApplicationStatus">
     UPDATE application_status
-    SET status = #{status},
-    is_deleted = #{isDeleted} WHERE status_uuid = #{statusUuid}
+    SET status = #{status}
+    WHERE course_uuid = #{courseUuid}
   </update>
 
 </mapper>
