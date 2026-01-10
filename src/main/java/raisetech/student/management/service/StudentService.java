@@ -134,7 +134,12 @@ public class StudentService {
       repository.registerStudentCourse(studentCourse);
 
       // 課題44により追加。引数の studentDetail から status を取り出す
-      ApplicationStatus status = studentDetail.getApplicationStatusList().get(0);
+      // get(0) をやめて、このコースの UUID に紐づくステータスをリストから探す
+      ApplicationStatus status = studentDetail.getApplicationStatusList().stream()
+          .filter(s -> s.getCourseUuid() != null && s.getCourseUuid()
+              .equals(studentCourse.getCourseUuid()))
+          .findFirst()
+          .orElse(new ApplicationStatus()); // 見つからない場合は空のオブジェクトを生成
 
       initApplicationStatus(status, studentCourse.getCourseUuid());
       repository.registerApplicationStatus(status);
@@ -155,7 +160,7 @@ public class StudentService {
     // repository:: ではなく this:: に書き換える！
     studentDetail.getApplicationStatusList().forEach(this::updateApplicationStatus);
   }
-  
+
   /**
    * 申込状況の更新を行います。 DBに対象のコースIDのステータスが存在しない場合は、新規登録(INSERT)を行います。
    *

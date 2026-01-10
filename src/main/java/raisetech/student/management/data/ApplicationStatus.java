@@ -10,5 +10,5 @@ public class ApplicationStatus {
   private String statusUuid;
   private String courseUuid;
   private String status;
-  private boolean isDeleted;
+  private Boolean isDeleted;
 }

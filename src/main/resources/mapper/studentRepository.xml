@@ -5,9 +5,7 @@
 
   <!-- 受講生の新規登録 -->
   <insert id="registerStudent"
-    keyProperty="studentUuid"
-    parameterType="raisetech.student.management.data.Student"
-    useGeneratedKeys="true">
+    parameterType="raisetech.student.management.data.Student">
     INSERT INTO students(
     student_uuid,
     name,
@@ -30,45 +28,45 @@
     #{age},
     #{gender},
     #{remark},
-    #{deleted}
+    #{isDeleted, jdbcType=BOOLEAN}
     )
   </insert>
 
   <!-- 受講生コース情報の新規登録 -->
   <insert id="registerStudentCourse"
-    keyProperty="courseUuid"
-    parameterType="raisetech.student.management.data.StudentCourse"
-    useGeneratedKeys="true">
+    parameterType="raisetech.student.management.data.StudentCourse">
     INSERT INTO student_courses(
     course_uuid,
     student_uuid,
     course_name,
     start_date,
-    end_date
+    end_date,
+    is_deleted
     )
     VALUES(
     #{courseUuid},
     #{studentUuid},
     #{courseName},
     #{startDate},
-    #{endDate}
+    #{endDate},
+    #{isDeleted, jdbcType=BOOLEAN}
     )
   </insert>
 
   <!-- 新しくコースの申し込みがあった際に、その申込状況（status）をデータベースに新しく保存 -->
   <insert id="registerApplicationStatus"
-    keyProperty="statusUuid"
-    parameterType="raisetech.student.management.data.ApplicationStatus"
-    useGeneratedKeys="true">
+    parameterType="raisetech.student.management.data.ApplicationStatus">
     INSERT INTO application_status(
     status_uuid,
     course_uuid,
-    status
+    status,
+    is_deleted
     )
     VALUES(
     #{statusUuid},
     #{courseUuid},
-    #{status}
+    #{status},
+    #{isDeleted, jdbcType=BOOLEAN}
     )
   </insert>
 
@@ -144,7 +142,7 @@
     age = #{age},
     gender = #{gender},
     remark = #{remark},
-    is_deleted = #{deleted}
+    is_deleted = #{isDeleted}
     WHERE student_uuid = #{studentUuid}
   </update>
 

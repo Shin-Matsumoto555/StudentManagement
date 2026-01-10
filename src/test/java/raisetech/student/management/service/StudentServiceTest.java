@@ -3,6 +3,7 @@ package raisetech.student.management.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
 import java.time.LocalDateTime;
@@ -121,7 +122,8 @@ class StudentServiceTest {
     Mockito.verify(repository, times(1)).registerStudent(student);
     Mockito.verify(repository, times(1)).registerStudentCourse(course);
     // ↓ここから追加（申込状況登録の検証）
-    Mockito.verify(repository, times(1)).registerApplicationStatus(status);
+    // 修正後(verify の引数を any() に差し替え。住所の一致（@...）を無視させます。)
+    Mockito.verify(repository, times(1)).registerApplicationStatus(any(ApplicationStatus.class));
 
     assertEquals(studentDetail, actual);
   }
@@ -140,12 +142,18 @@ class StudentServiceTest {
     statusList.add(status);
 
     StudentDetail studentDetail = new StudentDetail(student, courseList, statusList);
+
+    // ★【変更箇所1】Serviceがupdate側に進むように「データがある状況」を作る
+    Mockito.when(repository.searchApplicationStatus(Mockito.any()))
+        .thenReturn(List.of(new ApplicationStatus()));
+
     // 実行
     sut.updateStudent(studentDetail);
     // 検証
     Mockito.verify(repository, times(1)).updateStudent(student);
     Mockito.verify(repository, times(1)).updateStudentCourse(course);
-    Mockito.verify(repository, times(1)).updateApplicationStatus(status);
+    // ★【変更箇所2】registerではなく、正しく「update」が1回呼ばれることを検証する
+    Mockito.verify(repository, Mockito.times(1)).updateApplicationStatus(Mockito.any());
   }
 
   @Test

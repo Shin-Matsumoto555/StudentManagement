@@ -105,6 +105,6 @@ class StudentConverterTest {
     assertThat(converted.getFuriganaName()).isEqualTo("チャーリー");
     assertThat(converted.getEmail()).isEqualTo("charlie@example.com");
     assertThat(converted.getAddress()).isEqualTo("Tokyo");
-    assertThat(converted.isDeleted()).isFalse();
+    assertThat(converted.getIsDeleted()).isFalse();
   }
 }

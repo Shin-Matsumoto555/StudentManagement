@@ -52,19 +52,12 @@ class StudentControllerTest {
 
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
-        .andExpect(content().json(
-            "["
-                + "{"
-                + "\"student\":null,"
-                + "\"studentCourseList\":null,"
-                + "\"applicationStatusList\":null"
-                + "},"
-                + "{"
-                + "\"student\":null,"
-                + "\"studentCourseList\":null,"
-                + "\"applicationStatusList\":null"
-                + "}"
-                + "]"));
+        .andExpect(content().json("""
+            [
+              {"student":null, "studentCourseList":null, "applicationStatusList":null},
+              {"student":null, "studentCourseList":null, "applicationStatusList":null}
+            ]
+            """));
     verify(service, times(1)).searchStudentList();
   }
 
@@ -96,7 +89,6 @@ class StudentControllerTest {
   @Test
   void 受講生一覧検索で条件を指定した時に適切な検索結果が返ること() throws Exception {
     StudentDetail detail = new StudentDetail();
-    // サービスが1件のデータを返すように設定（引数はどんなオブジェクトでも受け付ける any を使用）
     when(service.searchStudentList(any(Student.class), any(StudentCourse.class),
         any(ApplicationStatus.class)))
         .thenReturn(List.of(detail));
@@ -106,20 +98,16 @@ class StudentControllerTest {
             .param("courseName", "Java")
             .param("status", "仮申込"))
         .andExpect(status().isOk())
-        .andExpect(content().json(
-            "["
-                + "{"
-                + "\"student\":null,"
-                + "\"studentCourseList\":null,"
-                + "\"applicationStatusList\":null"
-                + "}"
-                + "]"));
+        .andExpect(content().json("""
+            [
+              {"student":null, "studentCourseList":null, "applicationStatusList":null}
+            ]
+            """));
 
-    // 3つの引数を取る searchStudentList が呼ばれたことを確認
     verify(service, times(1)).searchStudentList(any(Student.class), any(StudentCourse.class),
         any(ApplicationStatus.class));
   }
-
+  
   @Test
   void registerStudentで正常に登録できること() throws Exception {
     StudentDetail detail = new StudentDetail();

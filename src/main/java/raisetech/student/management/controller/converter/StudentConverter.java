@@ -67,7 +67,7 @@ public class StudentConverter {
     student.setAge(detail.getStudent().getAge());
     student.setGender(detail.getStudent().getGender());
     student.setRemark(detail.getStudent().getRemark());
-    student.setDeleted(false);
+    student.setIsDeleted(false);
     return student;
   }
 }

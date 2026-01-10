@@ -14,5 +14,5 @@ public class StudentCourse {
   private String courseName;
   private java.time.LocalDateTime startDate;
   private java.time.LocalDateTime endDate;
-  private boolean isDeleted;
+  private Boolean isDeleted;
 }

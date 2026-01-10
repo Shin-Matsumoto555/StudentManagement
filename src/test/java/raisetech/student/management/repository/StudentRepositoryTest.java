@@ -41,7 +41,7 @@ class StudentRepositoryTest {
     student.setAge(35);
     student.setGender("Male");
     student.setRemark("Studying hard to become a Java Full Stack Engineer.");
-    student.setDeleted(false);
+    student.setIsDeleted(false);
 
     sut.registerStudent(student);
 
@@ -111,6 +111,9 @@ class StudentRepositoryTest {
     course.setStartDate(LocalDateTime.now());
     course.setEndDate(LocalDateTime.now().plusYears(1));
 
+    // ★ ここに以下の1行を追加！ ★
+    course.setIsDeleted(false);
+    
     sut.registerStudentCourse(course);
 
     List<StudentCourse> actual = sut.searchStudentCourse(course.getStudentUuid());
