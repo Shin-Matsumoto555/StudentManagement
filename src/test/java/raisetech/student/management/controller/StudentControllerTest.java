@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -33,6 +34,10 @@ class StudentControllerTest {
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
   @Autowired
   private MockMvc mockMvc;
+
+  @Autowired
+  private ObjectMapper objectMapper; // 指摘により追加
+
   @MockBean
   private StudentService service;
 
@@ -107,7 +112,7 @@ class StudentControllerTest {
     verify(service, times(1)).searchStudentList(any(Student.class), any(StudentCourse.class),
         any(ApplicationStatus.class));
   }
-  
+
   @Test
   void registerStudentで正常に登録できること() throws Exception {
     StudentDetail detail = new StudentDetail();
@@ -149,6 +154,30 @@ class StudentControllerTest {
                   "applicationStatusList": [{}]
                 }
             """));
+
+    verify(service, times(1)).registerStudent(any(StudentDetail.class));
+  }
+
+  @Test
+  void registerStudentで正常に登録できること2() throws Exception {
+    Student student = new Student();
+    student.setStudentUuid("new-uuid");
+    student.setName("Shin");
+    student.setFuriganaName("シン");
+    student.setEmail("test@example.com");
+    student.setAddress("Tokyo");
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setApplicationStatusList(List.of(new ApplicationStatus()));
+
+    when(service.registerStudent(any(StudentDetail.class))).thenReturn(detail);
+
+    mockMvc.perform(post("/registerStudent")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(detail)))
+        .andExpect(status().isOk())
+        .andExpect(content().json(objectMapper.writeValueAsString(detail)));
 
     verify(service, times(1)).registerStudent(any(StudentDetail.class));
   }

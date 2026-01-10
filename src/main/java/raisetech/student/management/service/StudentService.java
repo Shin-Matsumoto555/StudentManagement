@@ -50,9 +50,16 @@ public class StudentService {
    * @param courseUuid        受講生コースID
    */
   void initApplicationStatus(ApplicationStatus applicationStatus, String courseUuid) {
-    applicationStatus.setStatusUuid(UUID.randomUUID().toString()); // 状況IDを生成
-    applicationStatus.setCourseUuid(courseUuid);                   // どのコースの状況か紐付け
-    applicationStatus.setStatus("仮申込");                          // 初期ステータスを「仮申込」に設定
+    // ★【修正：指摘対策】既にUUIDがある場合は上書きしない
+    if (applicationStatus.getStatusUuid() == null || applicationStatus.getStatusUuid().isEmpty()) {
+      applicationStatus.setStatusUuid(UUID.randomUUID().toString());
+    }
+    applicationStatus.setCourseUuid(courseUuid);
+
+    // ステータスが空ならデフォルト値を設定
+    if (applicationStatus.getStatus() == null || applicationStatus.getStatus().isEmpty()) {
+      applicationStatus.setStatus("仮申込");
+    }
   }
 
   /**
@@ -129,6 +136,11 @@ public class StudentService {
 
     repository.registerStudent(student);    // ここから DB に保存する処理（やりたいこと）
 
+    // ★ ここを追加：もし申込状況リストが空(null)で送られてきても、エラーにならないようにする
+    if (studentDetail.getApplicationStatusList() == null) {
+      studentDetail.setApplicationStatusList(new java.util.ArrayList<>());
+    }
+
     studentDetail.getStudentCourseList().forEach(studentCourse -> {      // コース情報登録も行う
       initStudentCourse(studentCourse, student.getStudentUuid());
       repository.registerStudentCourse(studentCourse);
@@ -157,8 +169,12 @@ public class StudentService {
     repository.updateStudent(studentDetail.getStudent()); // Student の更新
     studentDetail.getStudentCourseList()
         .forEach(repository::updateStudentCourse); // コースの更新（今は uuid が存在する前提の最小構成）
-    // repository:: ではなく this:: に書き換える！
-    studentDetail.getApplicationStatusList().forEach(this::updateApplicationStatus);
+
+    // ★ ここを追加：更新時もリストが null かどうかチェックする
+    if (studentDetail.getApplicationStatusList() != null) {
+      // repository:: ではなく this:: に書き換える！
+      studentDetail.getApplicationStatusList().forEach(this::updateApplicationStatus);
+    }
   }
 
   /**
