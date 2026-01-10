@@ -60,7 +60,8 @@ class StudentConverterTest {
     // テスト対象メソッド呼び出し
     List<StudentDetail> details = sut.convertStudentDetails(
         List.of(student1, student2),
-        List.of(course1, course2, course3, course4)
+        List.of(course1, course2, course3, course4),
+        List.of()
     );
 
     // 検証
@@ -104,6 +105,6 @@ class StudentConverterTest {
     assertThat(converted.getFuriganaName()).isEqualTo("チャーリー");
     assertThat(converted.getEmail()).isEqualTo("charlie@example.com");
     assertThat(converted.getAddress()).isEqualTo("Tokyo");
-    assertThat(converted.isDeleted()).isFalse();
+    assertThat(converted.getIsDeleted()).isFalse();
   }
 }

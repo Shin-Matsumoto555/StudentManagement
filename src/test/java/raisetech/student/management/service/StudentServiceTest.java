@@ -3,6 +3,7 @@ package raisetech.student.management.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.student.management.controller.converter.StudentConverter;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -41,14 +43,17 @@ class StudentServiceTest {
     // 事前準備
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
+    List<ApplicationStatus> statusList = new ArrayList<>();
     Mockito.when(repository.search()).thenReturn(studentList);
     Mockito.when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
+    Mockito.when(repository.searchApplicationStatusList()).thenReturn(statusList);
     // 実行
     sut.searchStudentList();
     // 検証
     Mockito.verify(repository, times(1)).search();
     Mockito.verify(repository, times(1)).searchStudentCourseList();
-    Mockito.verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
+    Mockito.verify(converter, times(1))
+        .convertStudentDetails(studentList, studentCourseList, statusList);
     // 後処理
     // ここでDBを元に戻す
 
@@ -88,7 +93,7 @@ class StudentServiceTest {
     sut.initStudentCourse(studentCourse, studentUuid);
     // 検証
     assertEquals(studentUuid, studentCourse.getStudentUuid());
-    assertNotNull(studentCourse.getUuid());
+    assertNotNull(studentCourse.getCourseUuid());
     assertEquals(LocalDateTime.now().getHour(),
         studentCourse.getStartDate().getHour());
     assertEquals(LocalDateTime.now().plusYears(1).getYear(),
@@ -103,12 +108,23 @@ class StudentServiceTest {
     StudentCourse course = new StudentCourse();
     List<StudentCourse> courseList = new ArrayList<>();
     courseList.add(course);
-    StudentDetail studentDetail = new StudentDetail(student, courseList);
+
+    // ↓ここから追加（ApplicationStatusの準備）
+    ApplicationStatus status = new ApplicationStatus();
+    List<ApplicationStatus> statusList = new ArrayList<>();
+    statusList.add(status);
+
+    StudentDetail studentDetail = new StudentDetail(student, courseList, statusList);
+
     // 実行
     StudentDetail actual = sut.registerStudent(studentDetail);
     // 検証
     Mockito.verify(repository, times(1)).registerStudent(student);
     Mockito.verify(repository, times(1)).registerStudentCourse(course);
+    // ↓ここから追加（申込状況登録の検証）
+    // 修正後(verify の引数を any() に差し替え。住所の一致（@...）を無視させます。)
+    Mockito.verify(repository, times(1)).registerApplicationStatus(any(ApplicationStatus.class));
+
     assertEquals(studentDetail, actual);
   }
 
@@ -119,12 +135,48 @@ class StudentServiceTest {
     StudentCourse course = new StudentCourse();
     List<StudentCourse> courseList = new ArrayList<>();
     courseList.add(course);
-    StudentDetail studentDetail = new StudentDetail(student, courseList);
+
+    // 申込状況も空ではなく、具体的なデータとして用意する
+    ApplicationStatus status = new ApplicationStatus();
+    List<ApplicationStatus> statusList = new ArrayList<>();
+    statusList.add(status);
+
+    StudentDetail studentDetail = new StudentDetail(student, courseList, statusList);
+
+    // ★【変更箇所1】Serviceがupdate側に進むように「データがある状況」を作る
+    Mockito.when(repository.searchApplicationStatus(Mockito.any()))
+        .thenReturn(List.of(new ApplicationStatus()));
+
     // 実行
     sut.updateStudent(studentDetail);
     // 検証
     Mockito.verify(repository, times(1)).updateStudent(student);
     Mockito.verify(repository, times(1)).updateStudentCourse(course);
+    // ★【変更箇所2】registerではなく、正しく「update」が1回呼ばれることを検証する
+    Mockito.verify(repository, Mockito.times(1)).updateApplicationStatus(Mockito.any());
+  }
+
+  @Test
+  void 受講生一覧検索_条件指定あり_repositoryの検索処理が呼ばれる() {
+    // 準備：検索条件となるオブジェクトを用意
+    Student student = new Student();
+    StudentCourse course = new StudentCourse();
+    ApplicationStatus status = new ApplicationStatus();
+
+    // Repositoryが返すダミーの生徒リスト
+    List<Student> studentList = new ArrayList<>();
+    studentList.add(student);
+
+    // Mockの振る舞い設定
+    Mockito.when(repository.searchByConditions(student, course, status)).thenReturn(studentList);
+    Mockito.when(repository.searchStudentCourseList()).thenReturn(new ArrayList<>());
+    Mockito.when(repository.searchApplicationStatusList()).thenReturn(new ArrayList<>());
+
+    // 実行
+    sut.searchStudentList(student, course, status);
+
+    // 検証：条件を保持したままリポジトリの検索メソッドが呼ばれたか
+    Mockito.verify(repository, times(1)).searchByConditions(student, course, status);
   }
 
 }

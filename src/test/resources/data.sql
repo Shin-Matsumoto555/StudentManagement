@@ -16,3 +16,12 @@ VALUES
 ((SELECT student_uuid FROM students WHERE name = 'Gordon Ramsay'), 'Cooking(SQL) Course', '2025-03-01 10:00:00', '2026-03-01 10:00:00'),
 ((SELECT student_uuid FROM students WHERE name = 'Rick Sanchez'), 'Interdimensional Science', '2025-04-01 10:00:00', '2026-04-01 10:00:00'),
 ((SELECT student_uuid FROM students WHERE name = 'Taylor Swift'), 'Songwriting Course', '2025-05-01 10:00:00', '2026-05-01 10:00:00');
+
+-- 申込状況データ（course_uuid を特定して入れる。カラム名を course_uuid に修正）
+INSERT INTO application_status (course_uuid, status)
+VALUES
+((SELECT course_uuid FROM student_courses WHERE course_name = 'Java Course'), '受講中'),
+((SELECT course_uuid FROM student_courses WHERE course_name = 'Marketing Course'), '仮申込'),
+((SELECT course_uuid FROM student_courses WHERE course_name = 'Cooking(SQL) Course'), '本申込'),
+((SELECT course_uuid FROM student_courses WHERE course_name = 'Interdimensional Science'), '受講終了'),
+((SELECT course_uuid FROM student_courses WHERE course_name = 'Songwriting Course'), '受講中');

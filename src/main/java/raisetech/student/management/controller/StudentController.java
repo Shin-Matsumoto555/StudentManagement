@@ -8,11 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.student.management.data.Student;
+import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
 
@@ -58,6 +61,20 @@ public class StudentController {
   }
 
   /**
+   * 【課題44】受講生の条件検索です。 受講生、コース、申込状況の条件に合致する情報を取得します。
+   *
+   * @return 条件に合致した受講生詳細一覧
+   */
+  @Operation(summary = "条件検索", description = "条件を指定して受講生を検索します。")
+  @GetMapping("/studentSearch")
+  public List<StudentDetail> searchStudentList(
+      @ModelAttribute Student student,
+      @ModelAttribute StudentCourse studentCourse,
+      @ModelAttribute raisetech.student.management.data.ApplicationStatus applicationStatus) {
+    return service.searchStudentList(student, studentCourse, applicationStatus);
+  }
+
+  /**
    * 受講生詳細の登録を行います。
    *
    * @param studentDetail 受講生詳細
@@ -84,4 +101,19 @@ public class StudentController {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
+
+  /**
+   * 申込状況（ステータス）の更新を行います。 「仮申込」「本申込」「受講中」「受講終了」などの状態を変更します。
+   *
+   * @param applicationStatus 申込状況情報
+   * @return 実行結果
+   */
+  @Operation(summary = "申込状況更新", description = "コースの申込状況（ステータス）を更新します。")
+  @PutMapping("/updateApplicationStatus")
+  public ResponseEntity<String> updateApplicationStatus(
+      @RequestBody raisetech.student.management.data.ApplicationStatus applicationStatus) {
+    service.updateApplicationStatus(applicationStatus);
+    return ResponseEntity.ok("申込状況の更新が成功しました。");
+  }
+
 }

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -21,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
+import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
 
@@ -31,6 +34,10 @@ class StudentControllerTest {
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
   @Autowired
   private MockMvc mockMvc;
+
+  @Autowired
+  private ObjectMapper objectMapper; // 指摘により追加
+
   @MockBean
   private StudentService service;
 
@@ -39,7 +46,8 @@ class StudentControllerTest {
     when(service.searchStudentList()).thenReturn(List.of(new StudentDetail()));
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
-        .andExpect(content().json("[{\"student\":null,\"studentCourseList\":null}]"));
+        .andExpect(content().json(
+            "[{\"student\":null,\"studentCourseList\":null,\"applicationStatusList\":null}]"));
     verify(service, times(1)).searchStudentList();
   }
 
@@ -49,9 +57,12 @@ class StudentControllerTest {
 
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
-        .andExpect(content().json(
-            "[{\"student\":null,\"studentCourseList\":null},{\"student\":null,\"studentCourseList\":null}]"));
-
+        .andExpect(content().json("""
+            [
+              {"student":null, "studentCourseList":null, "applicationStatusList":null},
+              {"student":null, "studentCourseList":null, "applicationStatusList":null}
+            ]
+            """));
     verify(service, times(1)).searchStudentList();
   }
 
@@ -81,6 +92,28 @@ class StudentControllerTest {
   }
 
   @Test
+  void 受講生一覧検索で条件を指定した時に適切な検索結果が返ること() throws Exception {
+    StudentDetail detail = new StudentDetail();
+    when(service.searchStudentList(any(Student.class), any(StudentCourse.class),
+        any(ApplicationStatus.class)))
+        .thenReturn(List.of(detail));
+
+    mockMvc.perform(get("/studentSearch")
+            .param("name", "Shin")
+            .param("courseName", "Java")
+            .param("status", "仮申込"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("""
+            [
+              {"student":null, "studentCourseList":null, "applicationStatusList":null}
+            ]
+            """));
+
+    verify(service, times(1)).searchStudentList(any(Student.class), any(StudentCourse.class),
+        any(ApplicationStatus.class));
+  }
+
+  @Test
   void registerStudentで正常に登録できること() throws Exception {
     StudentDetail detail = new StudentDetail();
     Student student = new Student();
@@ -90,6 +123,7 @@ class StudentControllerTest {
     student.setEmail("test@example.com");
     student.setAddress("Tokyo");
     detail.setStudent(student);
+    detail.setApplicationStatusList(List.of(new ApplicationStatus())); // ←ここを追加
 
     when(service.registerStudent(any(StudentDetail.class))).thenReturn(detail);
 
@@ -116,9 +150,34 @@ class StudentControllerTest {
                     "email": "test@example.com",
                     "address": "Tokyo"
                   },
-                  "studentCourseList": null
+                  "studentCourseList": null,
+                  "applicationStatusList": [{}]
                 }
             """));
+
+    verify(service, times(1)).registerStudent(any(StudentDetail.class));
+  }
+
+  @Test
+  void registerStudentで正常に登録できること2() throws Exception {
+    Student student = new Student();
+    student.setStudentUuid("new-uuid");
+    student.setName("Shin");
+    student.setFuriganaName("シン");
+    student.setEmail("test@example.com");
+    student.setAddress("Tokyo");
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setApplicationStatusList(List.of(new ApplicationStatus()));
+
+    when(service.registerStudent(any(StudentDetail.class))).thenReturn(detail);
+
+    mockMvc.perform(post("/registerStudent")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(detail)))
+        .andExpect(status().isOk())
+        .andExpect(content().json(objectMapper.writeValueAsString(detail)));
 
     verify(service, times(1)).registerStudent(any(StudentDetail.class));
   }

@@ -9,9 +9,10 @@ import lombok.Setter;
 @Setter
 public class StudentCourse {
 
-  private String uuid;
+  private String courseUuid;
   private String studentUuid;
   private String courseName;
   private java.time.LocalDateTime startDate;
   private java.time.LocalDateTime endDate;
+  private Boolean isDeleted;
 }

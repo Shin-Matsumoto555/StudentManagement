@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -36,10 +37,29 @@ public class StudentService {
   void initStudentCourse(StudentCourse studentCourse, String studentUuid) {
     LocalDateTime now = LocalDateTime.now();
 
-    studentCourse.setUuid(UUID.randomUUID().toString());      // 各コース行の UUID を生成
+    studentCourse.setCourseUuid(UUID.randomUUID().toString());      // 各コース行の UUID を生成
     studentCourse.setStudentUuid(studentUuid);
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
+  }
+
+  /**
+   * 申込状況情報を登録する際の初期情報を設定する。
+   *
+   * @param applicationStatus 申込状況情報
+   * @param courseUuid        受講生コースID
+   */
+  void initApplicationStatus(ApplicationStatus applicationStatus, String courseUuid) {
+    // ★【修正：指摘対策】既にUUIDがある場合は上書きしない
+    if (applicationStatus.getStatusUuid() == null || applicationStatus.getStatusUuid().isEmpty()) {
+      applicationStatus.setStatusUuid(UUID.randomUUID().toString());
+    }
+    applicationStatus.setCourseUuid(courseUuid);
+
+    // ステータスが空ならデフォルト値を設定
+    if (applicationStatus.getStatus() == null || applicationStatus.getStatus().isEmpty()) {
+      applicationStatus.setStatus("仮申込");
+    }
   }
 
   /**
@@ -50,7 +70,11 @@ public class StudentService {
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+
+    // ↓ 全件検索の時も「申込状況」を取ってくるようにします。
+    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
+
+    return converter.convertStudentDetails(studentList, studentCourseList, applicationStatusList);
   }
 
   /**
@@ -67,8 +91,36 @@ public class StudentService {
       throw new RuntimeException("該当の学生が存在しません: " + studentUuid);
     }
 
-    List<StudentCourse> studentCourse = repository.searchStudentCourse(student.getStudentUuid());
-    return new StudentDetail(student, studentCourse);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourse(
+        student.getStudentUuid());
+    // ↓ 講義44により追加。コースIDを使って「申込状況」をDBから取ってきます。
+    List<ApplicationStatus> applicationStatusList = studentCourseList.stream()
+        .flatMap(course -> repository.searchApplicationStatus(course.getCourseUuid()).stream())
+        .toList();
+
+    // 最後、戻り値の StudentDetail に applicationStatusList も渡すように書き換えます。
+    return new StudentDetail(student, studentCourseList, applicationStatusList);
+  }
+
+  /**
+   * 条件を指定して受講生詳細の一覧を検索します。 受講生情報、コース情報、申込状況のいずれかの条件に合致する受講生を取得し、紐づく情報を設定します。
+   *
+   * @param student           受講生情報の検索条件
+   * @param studentCourse     受講生コース情報の検索条件
+   * @param applicationStatus 申込状況の検索条件
+   * @return 受講生詳細一覧
+   */
+  public List<StudentDetail> searchStudentList(Student student, StudentCourse studentCourse,
+      ApplicationStatus applicationStatus) {
+    // 1. Repositoryに新設した searchByConditions を呼び、条件に合う「生徒」だけを特定する
+    List<Student> studentList = repository.searchByConditions(student, studentCourse,
+        applicationStatus);
+
+    // 2. あとは既存の「がっちゃんこ」の仕組み（Converter）をそのまま使って詳細を組み立てる
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
+    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
+
+    return converter.convertStudentDetails(studentList, studentCourseList, applicationStatusList);
   }
 
   /**
@@ -83,9 +135,26 @@ public class StudentService {
     student.setStudentUuid(UUID.randomUUID().toString());    // UUID を生成してセット（準備2）
 
     repository.registerStudent(student);    // ここから DB に保存する処理（やりたいこと）
+
+    // ★ ここを追加：もし申込状況リストが空(null)で送られてきても、エラーにならないようにする
+    if (studentDetail.getApplicationStatusList() == null) {
+      studentDetail.setApplicationStatusList(new java.util.ArrayList<>());
+    }
+
     studentDetail.getStudentCourseList().forEach(studentCourse -> {      // コース情報登録も行う
       initStudentCourse(studentCourse, student.getStudentUuid());
       repository.registerStudentCourse(studentCourse);
+
+      // 課題44により追加。引数の studentDetail から status を取り出す
+      // get(0) をやめて、このコースの UUID に紐づくステータスをリストから探す
+      ApplicationStatus status = studentDetail.getApplicationStatusList().stream()
+          .filter(s -> s.getCourseUuid() != null && s.getCourseUuid()
+              .equals(studentCourse.getCourseUuid()))
+          .findFirst()
+          .orElse(new ApplicationStatus()); // 見つからない場合は空のオブジェクトを生成
+
+      initApplicationStatus(status, studentCourse.getCourseUuid());
+      repository.registerApplicationStatus(status);
     });
     return studentDetail;
   }
@@ -100,5 +169,32 @@ public class StudentService {
     repository.updateStudent(studentDetail.getStudent()); // Student の更新
     studentDetail.getStudentCourseList()
         .forEach(repository::updateStudentCourse); // コースの更新（今は uuid が存在する前提の最小構成）
+
+    // ★ ここを追加：更新時もリストが null かどうかチェックする
+    if (studentDetail.getApplicationStatusList() != null) {
+      // repository:: ではなく this:: に書き換える！
+      studentDetail.getApplicationStatusList().forEach(this::updateApplicationStatus);
+    }
+  }
+
+  /**
+   * 申込状況の更新を行います。 DBに対象のコースIDのステータスが存在しない場合は、新規登録(INSERT)を行います。
+   *
+   * @param applicationStatus 申込状況
+   */
+  @Transactional
+  public void updateApplicationStatus(ApplicationStatus applicationStatus) {
+    // 1. まず現在のステータスをDBから探す
+    List<ApplicationStatus> statusList = repository.searchApplicationStatus(
+        applicationStatus.getCourseUuid());
+
+    if (statusList.isEmpty()) {
+      // 2. DBにまだレコードがない場合は、新規登録(INSERT)
+      applicationStatus.setStatusUuid(UUID.randomUUID().toString()); // UUIDを新しく作る
+      repository.registerApplicationStatus(applicationStatus);
+    } else {
+      // 3. すでにDBにレコードがある場合は、更新(UPDATE)
+      repository.updateApplicationStatus(applicationStatus);
+    }
   }
 }
