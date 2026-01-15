@@ -50,7 +50,7 @@ jobs:
           script: |
             sudo yum update -y
             if [ -f /etc/systemd/system/StudentManagement.service ]; then
-            echo "already exists Service File"
+              echo "already exists Service File"
             else
             cat <<EOL | sudo tee -a /etc/systemd/system/StudentManagement.service
             [Unit]
