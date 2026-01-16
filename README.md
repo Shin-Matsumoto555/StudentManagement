@@ -47,7 +47,7 @@ http://studentmanagementalb-1209990620.ap-northeast-1.elb.amazonaws.com/swagger-
 デモサイトのトップ画面と、Swagger UIに実装されているAPIの対応関係を整理しています。
 | カテゴリ | 機能内容 | 技術的ポイント | 対応API (Swagger) |
 | :--- | :--- | :--- | :--- |
-| **受講生一覧・検索** | 名前・IDによる動的フィルタリング | **MyBatis動的SQL**。一文字のあいまい検索や複数条件の組み合わせに対応。 | `GET /studentList` |
+| **受講生一覧・検索** | 名前・IDによる動的フィルタリング | **MyBatis動的SQL**。一文字のあいまい検索や複数条件の組み合わせに対応。 | `GET /studentList`, `GET /studentSearch` |
 | **受講生情報の更新** | 既存データのセキュアな編集 | 特定IDに対する安全なデータ上書き処理。 | `PUT /updateStudent` |
 | **新規受講生登録** | 受講生とコースの新規保存 | ユーザー利便性を考慮したUI/UX設計と、将来的な登録機能への拡張性。 | `POST /registerStudent` |
 | **APIドキュメント** | インターフェースの自動可視化 | OpenAPI 3.0準拠。開発効率を高めるドキュメント駆動設計。 | `/swagger-ui/index.html` |
