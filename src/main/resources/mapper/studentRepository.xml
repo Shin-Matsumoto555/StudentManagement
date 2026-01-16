@@ -120,9 +120,11 @@
           AND s.is_deleted = #{student.isDeleted}
         </if>
       </if>
+
       <if test="course != null and course.courseName != null and course.courseName != ''">
-        AND sc.course_name = #{course.courseName}
+        AND sc.course_name LIKE CONCAT('%', #{course.courseName}, '%')
       </if>
+
       <if test="status != null and status.status != null and status.status != ''">
         AND aps.status = #{status.status}
       </if>

@@ -66,11 +66,13 @@ public class StudentController {
    * @return 条件に合致した受講生詳細一覧
    */
   @Operation(summary = "条件検索", description = "条件を指定して受講生を検索します。")
+  // StudentController.java
   @GetMapping("/studentSearch")
   public List<StudentDetail> searchStudentList(
-      @ModelAttribute Student student,
-      @ModelAttribute StudentCourse studentCourse,
-      @ModelAttribute raisetech.student.management.data.ApplicationStatus applicationStatus) {
+      @ModelAttribute("student") Student student,  // ここに ("student")
+      @ModelAttribute("course") StudentCourse studentCourse, // ここに ("course")
+      @ModelAttribute("status") raisetech.student.management.data.ApplicationStatus applicationStatus) { // ここに ("status")
+
     return service.searchStudentList(student, studentCourse, applicationStatus);
   }
 
