@@ -50,7 +50,7 @@ http://studentmanagementalb-1209990620.ap-northeast-1.elb.amazonaws.com/swagger-
 | **受講生一覧・検索** | 名前・IDによる動的フィルタリング | **MyBatis動的SQL**。一文字のあいまい検索や複数条件の組み合わせに対応。 | `GET /studentList`, `GET /studentSearch` |
 | **受講生情報の更新** | 既存データのセキュアな編集 | 特定IDに対する安全なデータ上書き処理。 | `PUT /updateStudent` |
 | **新規受講生登録** | 受講生とコースの新規保存 | ユーザー利便性を考慮したUI/UX設計と、将来的な登録機能への拡張性。 | `POST /registerStudent` |
-| **APIドキュメント** | インターフェースの自動可視化 | OpenAPI 3.0準拠。開発効率を高めるドキュメント駆動設計。 | `/swagger-ui/index.html` |
+| **APIドキュメント** | API仕様の自動公開 | コードから仕様書を自動で生成。ブラウザ上で動作テスト（Try it out）が可能。 | `/swagger-ui/index.html` |
 ### (1) 受講生一覧・検索
 登録されている受講生の情報を検索し、詳細を確認できる機能です。
 - **画面上の操作**: 「一覧を開く」からリストを表示。検索窓でID（完全一致）や名前（部分一致）によるフィルタリングが可能です。
@@ -104,22 +104,30 @@ erDiagram
     students ||--o{ student_courses : "1:N"
     student_courses ||--o{ application_status : "1:1"
     students {
-        string student_uuid PK "受講生UUID"
+        string student_uuid PK "UUID"
         string name "氏名"
         string furigana_name "フリガナ"
-        string email "メールアドレス"
-        boolean is_deleted "削除フラグ"
+        string nickname "ニックネーム"
+        string email "メール"
+        string address "住所"
+        int age "年齢"
+        string gender "性別"
+        string remark "備考"
+        boolean is_deleted "論理削除"
     }
     student_courses {
         string course_uuid PK "コースUUID"
         string student_uuid FK "受講生UUID"
         string course_name "コース名"
         date start_date "開始日"
+        date end_date "終了日"
+        boolean is_deleted "論理削除"
     }
     application_status {
         string status_uuid PK "ステータスUUID"
         string course_uuid FK "コースUUID"
-        string status "申込状況(仮申込/本申込等)"
+        string status "申込状況"
+        boolean is_deleted "論理削除"
     }
 ```
 
