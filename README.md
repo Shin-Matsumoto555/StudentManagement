@@ -9,8 +9,8 @@
 
 ##  1. サービス概要 📝
 
-ITスクールの受講生情報を効率的に保持・照会するための管理システムです。
-**MyBatisによる動的SQL**を活用した柔軟な検索エンジンと、**AWS（ALB/EC2/RDS）**を用いた可用性の高いインフラ構成を、GitHub ActionsによるCI/CDパイプラインで構築しました。
+Java 21 / Spring Boot 3 で構築した、ITスクールの受講生情報を効率的に保持・管理するためのシステムです。 
+バックエンドには MyBatisによる動的SQL を採用し、複数の条件を組み合わせた柔軟な検索機能を実装。インフラは AWS（ALB/EC2/RDS） を活用して可用性を確保し、GitHub ActionsによるCI/CDパイプラインで自動デプロイ環境を構築しています。
 <img width="1024" height="490" alt="image" src="https://github.com/user-attachments/assets/121721ae-4833-4731-89a2-3c2d3711bd16" />
 
 
